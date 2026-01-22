@@ -23,7 +23,10 @@ app = FastAPI(
 # CORS Config
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Simplified for dev, should be specific in prod
+    allow_origins=[
+        "http://localhost:5173",  # Local development
+        "https://voxwave-final-testing.vercel.app",  # Vercel domain
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,6 +50,10 @@ app.include_router(api_router)
 @app.on_event("startup")
 async def startup_event():
     init_auth_db(DB_PATH)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "voxwave-backend"}
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():

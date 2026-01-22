@@ -1,5 +1,18 @@
 services:
   - type: web
-    name: melodrift
+    name: voxwave-backend
     env: docker
     plan: free
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheck:
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PORT
+        value: 10000
