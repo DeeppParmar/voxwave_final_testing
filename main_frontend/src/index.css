@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* VoxWave Premium Dark Theme */
+    --background: 0 0% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Primary: Cobalt Blue #0C53A6 */
+    --primary: 210 86% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary: Dark Cerulean #003D82 */
+    --secondary: 212 100% 25%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 0 0% 14%;
+    --muted-foreground: 240 5% 55%;
+
+    /* Accent: Celtic Blue #2B6ABC */
+    --accent: 212 63% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 210 86% 35%;
+
+    --radius: 0.75rem;
+
+    /* VoxWave Custom Tokens */
+    /* Background Dark: Chinese Black #141414 */
+    --void: 0 0% 8%;
+    --void-deep: 0 0% 8%;
+    /* Optional Cool Shade: Cool Black #002F63 */
+    --cool-black: 212 100% 20%;
+    --violet-glow: 210 86% 35%;
+    --cyan-glow: 212 63% 45%;
+    --glass: 0 0% 100% / 0.05;
+    --glass-border: 0 0% 100% / 0.08;
+    --glass-hover: 0 0% 100% / 0.08;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210 86% 35%), hsl(212 63% 45%));
+    --gradient-glow: radial-gradient(circle at center, hsl(210 86% 35% / 0.3) 0%, transparent 70%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 12%), hsl(0 0% 8%));
+
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(210 86% 35% / 0.3);
+    --shadow-glow-cyan: 0 0 40px hsl(212 63% 45% / 0.3);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 20px 60px hsl(0 0% 0% / 0.5);
+
+    /* Sidebar specific */
+    --sidebar-background: 212 100% 20%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 210 86% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 212 100% 25%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 212 100% 18%;
+    --sidebar-ring: 210 86% 35%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #141414;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+}
+
+@layer components {
+  /* Glassmorphism */
+  .glass {
+    background: hsl(var(--glass));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--glass-border));
+  }
+
+  .glass-card {
+    background: linear-gradient(145deg, hsl(240 10% 10% / 0.8), hsl(240 10% 6% / 0.6));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-hover:hover {
+    background: hsl(var(--glass-hover));
+    border-color: hsl(0 0% 100% / 0.12);
+  }
+
+  /* Glow Effects */
+  .glow-violet {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glow-cyan {
+    box-shadow: var(--shadow-glow-cyan);
+  }
+
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Button glow on hover */
+  .btn-glow {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .btn-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: var(--gradient-primary);
+    border-radius: inherit;
+    opacity: 0;
+    z-index: -1;
+    filter: blur(15px);
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-glow:hover::before {
+    opacity: 0.6;
+  }
+
+  /* Floating animation */
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Pulse glow animation */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(210 86% 35% / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(210 86% 35% / 0.6);
+    }
+  }
+
+  /* Cascade animation for list items */
+  .cascade-item {
+    animation: cascadeIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  @keyframes cascadeIn {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Progress bar styling */
+  .progress-gradient {
+    background: var(--gradient-primary);
+  }
+
+  /* Visualizer bar animation */
+  .visualizer-bar {
+    animation: visualize 0.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes visualize {
+    from {
+      transform: scaleY(0.3);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  /* Playing indicator */
+  .playing-indicator {
+    display: flex;
+    gap: 2px;
+    align-items: flex-end;
+    height: 16px;
+  }
+
+  .playing-indicator span {
+    width: 3px;
+    background: hsl(var(--accent));
+    border-radius: 1px;
+    animation: playingBars 0.5s ease-in-out infinite alternate;
+  }
+
+  .playing-indicator span:nth-child(1) { animation-delay: 0s; height: 40%; }
+  .playing-indicator span:nth-child(2) { animation-delay: 0.1s; height: 70%; }
+  .playing-indicator span:nth-child(3) { animation-delay: 0.2s; height: 100%; }
+  .playing-indicator span:nth-child(4) { animation-delay: 0.3s; height: 50%; }
+
+  @keyframes playingBars {
+    from { transform: scaleY(0.4); }
+    to { transform: scaleY(1); }
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "voxwave",
+  "version": "2.0.0",
+  "description": "A modern music streaming application with YouTube integration",
+  "scripts": {
+    "backend": "python main.py",
+    "frontend": "cd main_frontend && npm run dev",
+    "build": "cd main_frontend && npm run build",
+    "start": "python main.py",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "install-deps": "pip install -r requirements.txt && cd main_frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "music",
+    "streaming",
+    "youtube",
+    "react",
+    "fastapi"
+  ],
+  "author": "VoxWave Team",
+  "license": "MIT"
+}
