@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Music2, File, Trash2, Play, Loader2, FolderOpen, CloudUpload, Youtube } from 'lucide-react';
-import axios from 'axios';
+import { api, baseURL as API_BASE } from '@/lib/axios';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { toast } from 'sonner';
 
@@ -20,7 +20,7 @@ interface SavedTrack {
   created_at: number;
 }
 
-const API_BASE = '';
+// API_BASE is imported from lib/axios
 
 const container = {
   hidden: { opacity: 0 },
@@ -60,9 +60,9 @@ export default function Library() {
 
   const fetchLibrary = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE}/library`);
+      const response = await api.get(`/library`);
       setFiles(response.data.songs || []);
-      const savedResp = await axios.get(`${API_BASE}/me/library`);
+      const savedResp = await api.get(`/me/library`);
       setSaved(savedResp.data.tracks || []);
     } catch (error) {
       toast.error('Failed to load library. Make sure the backend is running.');
@@ -80,13 +80,13 @@ export default function Library() {
 
     setUploading(true);
     const formData = new FormData();
-    
+
     for (let i = 0; i < uploadFiles.length; i++) {
       formData.append('file', uploadFiles[i]);
     }
 
     try {
-      await axios.post(`${API_BASE}/upload`, formData, {
+      await api.post(`/upload`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success('File uploaded successfully!');
@@ -129,7 +129,7 @@ export default function Library() {
 
   const handleRemoveSaved = async (t: SavedTrack) => {
     try {
-      await axios.delete(`${API_BASE}/me/library`, { params: { track_id: t.track_id, source: t.source } });
+      await api.delete(`/me/library`, { params: { track_id: t.track_id, source: t.source } });
       setSaved(prev => prev.filter(x => !(x.track_id === t.track_id && x.source === t.source)));
       toast.success('Removed from Your Library');
     } catch {
@@ -245,9 +245,8 @@ export default function Library() {
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`relative glass-card rounded-2xl p-8 transition-all duration-300 ${
-          dragActive ? 'ring-2 ring-primary bg-primary/10' : ''
-        }`}
+        className={`relative glass-card rounded-2xl p-8 transition-all duration-300 ${dragActive ? 'ring-2 ring-primary bg-primary/10' : ''
+          }`}
       >
         <input
           type="file"
@@ -308,9 +307,8 @@ export default function Library() {
                 variants={item}
                 layout
                 style={{ animationDelay: `${index * 0.05}s` }}
-                className={`glass-card rounded-xl p-4 flex items-center gap-4 group cursor-pointer transition-all hover:bg-muted/30 ${
-                  isCurrentTrack(file.filename) ? 'ring-1 ring-primary/50 bg-primary/5' : ''
-                }`}
+                className={`glass-card rounded-xl p-4 flex items-center gap-4 group cursor-pointer transition-all hover:bg-muted/30 ${isCurrentTrack(file.filename) ? 'ring-1 ring-primary/50 bg-primary/5' : ''
+                  }`}
                 onClick={() => handlePlayFile(file)}
               >
                 {/* Thumbnail */}

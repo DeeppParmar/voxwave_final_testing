@@ -44,7 +44,7 @@ if (DIST_DIR / "index.html").exists():
     app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
 
 # Include API Router
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api")
 
 
 @app.on_event("startup")
