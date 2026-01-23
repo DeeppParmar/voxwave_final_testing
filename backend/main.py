@@ -49,7 +49,7 @@ app.include_router(api_router, prefix="/api")
 
 @app.on_event("startup")
 async def startup_event():
-    init_auth_db(DB_PATH)
+    init_auth_db()
 
 @app.get("/health")
 async def health_check():

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, File, UploadFile, HTTPException, Query, Request, WebSocket, WebSocketDisconnect, Depends
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 import shutil
@@ -11,7 +11,9 @@ from datetime import datetime
 import httpx
 import asyncio
 
-from ..core.config import UPLOAD_DIR, ALLOWED_EXTENSIONS, MAX_FILE_SIZE, YOUTUBE_USER_AGENT, DB_PATH
+from sqlalchemy.orm import Session
+from ..core.database import get_db
+from ..core.config import UPLOAD_DIR, ALLOWED_EXTENSIONS, MAX_FILE_SIZE, YOUTUBE_USER_AGENT
 from ..models.schemas import UploadResponse, SearchResponse, HealthResponse, ErrorResponse, AuthRequest, AuthResponse, MeResponse, SavedTracksResponse, SaveTrackRequest
 from ..services.youtube import search_youtube_service, get_stream_url_service, create_error_response
 from ..services.rooms import active_rooms, room_connections, broadcast_to_room, handle_host_message, handle_listener_message
@@ -27,9 +29,9 @@ def _get_bearer_token(request: Request) -> str:
         return parts[1].strip()
     return ''
 
-def _require_user(request: Request):
+def _require_user(request: Request, db: Session):
     token = _get_bearer_token(request)
-    user = get_user_by_token(DB_PATH, token)
+    user = get_user_by_token(db, token)
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     return user
@@ -55,46 +57,46 @@ async def api_status():
     }
 
 @router.post("/auth/register", response_model=AuthResponse)
-async def register(payload: AuthRequest):
+async def register(payload: AuthRequest, db: Session = Depends(get_db)):
     try:
-        user = create_user(DB_PATH, payload.username, payload.password)
-        token = create_session(DB_PATH, user.id)
+        user = create_user(db, payload.username, payload.password)
+        token = create_session(db, user.id)
         return AuthResponse(token=token, username=user.username)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/auth/login", response_model=AuthResponse)
-async def login(payload: AuthRequest):
-    user = verify_credentials(DB_PATH, payload.username, payload.password)
+async def login(payload: AuthRequest, db: Session = Depends(get_db)):
+    user = verify_credentials(db, payload.username, payload.password)
     if not user:
         raise HTTPException(status_code=401, detail='Invalid username or password')
-    token = create_session(DB_PATH, user.id)
+    token = create_session(db, user.id)
     return AuthResponse(token=token, username=user.username)
 
 @router.post("/auth/logout")
-async def logout(request: Request):
+async def logout(request: Request, db: Session = Depends(get_db)):
     token = _get_bearer_token(request)
     if token:
-        delete_session(DB_PATH, token)
+        delete_session(db, token)
     return {"ok": True}
 
 @router.get("/me", response_model=MeResponse)
-async def me(request: Request):
-    user = _require_user(request)
+async def me(request: Request, db: Session = Depends(get_db)):
+    user = _require_user(request, db)
     return MeResponse(id=user.id, username=user.username)
 
 @router.get("/me/library", response_model=SavedTracksResponse)
-async def get_my_library(request: Request):
-    user = _require_user(request)
-    tracks = list_saved_tracks(DB_PATH, user.id)
+async def get_my_library(request: Request, db: Session = Depends(get_db)):
+    user = _require_user(request, db)
+    tracks = list_saved_tracks(db, user.id)
     return SavedTracksResponse(tracks=tracks)
 
 @router.post("/me/library")
-async def add_to_my_library(request: Request, payload: SaveTrackRequest):
-    user = _require_user(request)
+async def add_to_my_library(request: Request, payload: SaveTrackRequest, db: Session = Depends(get_db)):
+    user = _require_user(request, db)
     try:
         save_track(
-            DB_PATH,
+            db,
             user.id,
             track_id=payload.track_id,
             source=payload.source,
@@ -107,10 +109,10 @@ async def add_to_my_library(request: Request, payload: SaveTrackRequest):
     return {"ok": True}
 
 @router.delete("/me/library")
-async def remove_from_my_library(request: Request, track_id: str = Query(...), source: str = Query(...)):
-    user = _require_user(request)
+async def remove_from_my_library(request: Request, track_id: str = Query(...), source: str = Query(...), db: Session = Depends(get_db)):
+    user = _require_user(request, db)
     try:
-        remove_track(DB_PATH, user.id, track_id=track_id, source=source)
+        remove_track(db, user.id, track_id=track_id, source=source)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     return {"ok": True}
@@ -386,10 +388,10 @@ async def delete_song(filename: str):
 
 # Room endpoints
 @router.post("/create-room")
-async def create_room(request: Request):
+async def create_room(request: Request, db: Session = Depends(get_db)):
     import secrets
 
-    user = _require_user(request)
+    user = _require_user(request, db)
     room_id = secrets.token_urlsafe(8)
     active_rooms[room_id] = {
         'host_id': user.username,
