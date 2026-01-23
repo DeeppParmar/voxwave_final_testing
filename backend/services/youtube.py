@@ -21,8 +21,17 @@ else:
 
 
 def _search_videos_sync(q: str):
-    s = Search(q)
-    return s.videos
+    # 'use_oauth=True' triggers the OAuth flow or uses cached credentials.
+    # On a headless server like Render, this largely relies on the fallback client behavior
+    # or expects 'token.json' to be present if full auth is needed. 
+    # However, forcing the client often helps.
+    try:
+        s = Search(q, use_oauth=True, allow_oauth_cache=True)
+        return s.videos
+    except Exception as e:
+        logger.warning(f"Search failed with OAuth: {e}. Retrying without.")
+        s = Search(q)
+        return s.videos
 
 
 def _extract_audio_sync(video_id: str):
