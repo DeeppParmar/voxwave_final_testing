@@ -21,12 +21,20 @@ app = FastAPI(
 )
 
 # CORS Config
+origins = [
+    "http://localhost:5173",  # Local development
+    "http://localhost:3000",  # Local development alternative
+]
+
+# Add production frontend URL if set
+frontend_url = os.environ.get("FRONTEND_URL")
+if frontend_url:
+    origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Local development
-        "https://voxwave-final-testing.vercel.app",  # Vercel domain
-    ],
+    allow_origins=origins,
+    allow_origin_regex="https://.*\.vercel\.app",  # Allow all Vercel deployments (preview & production)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
