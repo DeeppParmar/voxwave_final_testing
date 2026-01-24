@@ -12,7 +12,7 @@ def generate_token():
         results = s.videos
         print("\nSUCCESS! OAuth token generated and cached.")
         print("Please check for a 'tokens.json' or 'cache' folder in your directory.")
-        print("You MUST commit this file/folder to GitHub for it to work on Render.")
+        print("If you plan to use OAuth on a server, ensure the generated token cache is available at runtime.")
     except Exception as e:
         print(f"\nError during OAuth: {e}")
 

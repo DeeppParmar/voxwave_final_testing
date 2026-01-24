@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Automatically use VITE_API_URL environment variable if set
-// Fallback to /api for relative paths (Render deployment where frontend is served by backend)
+// Fallback to /api for relative paths (when frontend is served by the backend)
 export const baseURL = import.meta.env.VITE_API_URL || "/api";
 
 export const api = axios.create({

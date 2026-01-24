@@ -20,7 +20,7 @@ DATA_DIR = ROOT_DIR / "data"
 DB_PATH = DATA_DIR / "voxwave.db"
 
 # Database Config
-# Render/Railway provide DATABASE_URL. If not set, fallback to local SQLite.
+# If DATABASE_URL is not set, fallback to local SQLite.
 DATABASE_URL = os.environ.get("DATABASE_URL")
 if not DATABASE_URL:
     # SQLALCHEMY requires 'sqlite:///' prefix
