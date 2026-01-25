@@ -13,6 +13,31 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
   const audioContextRef = useRef<AudioContext | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  const ensureAudioContextRunning = () => {
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      if (audioContextRef.current.state === 'suspended') {
+        audioContextRef.current.resume().catch(() => {});
+      }
+    } catch {
+    }
+  };
+
+  useEffect(() => {
+    const handleUserGesture = () => {
+      ensureAudioContextRunning();
+    };
+
+    window.addEventListener('pointerdown', handleUserGesture);
+    window.addEventListener('keydown', handleUserGesture);
+    return () => {
+      window.removeEventListener('pointerdown', handleUserGesture);
+      window.removeEventListener('keydown', handleUserGesture);
+    };
+  }, []);
+
   useEffect(() => {
     const audio = audioRef.current;
     const canvas = canvasRef.current;
@@ -22,11 +47,9 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
       if (isInitialized) return;
       
       try {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        audioContextRef.current = audioContext;
-        if (audioContext.state === 'suspended') {
-          audioContext.resume().catch(() => {});
-        }
+        ensureAudioContextRunning();
+        const audioContext = audioContextRef.current;
+        if (!audioContext) return;
         const analyzer = audioContext.createAnalyser();
         analyzer.fftSize = 64;
         

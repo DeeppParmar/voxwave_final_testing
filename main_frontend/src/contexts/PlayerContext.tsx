@@ -112,6 +112,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const audio = audioRef.current;
       if (!audio) return;
 
+      audio.muted = false;
+      audio.volume = volume;
+
       const isYoutube = track.source === 'youtube' && track.id.startsWith('yt-');
       const videoId = isYoutube ? track.id.slice(3) : null;
       let retries = 0;
@@ -136,6 +139,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       };
 
       audio.oncanplay = () => {
+        audio.muted = false;
+        audio.volume = volume;
         audio.play().catch(() => {
           toast.error('Failed to play audio. Please try again.');
         });
