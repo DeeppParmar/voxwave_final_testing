@@ -270,7 +270,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         playLocal,
       }}
     >
-      <audio ref={audioRef} />
+      <audio ref={audioRef} crossOrigin="anonymous" />
       {children}
     </PlayerContext.Provider>
   );

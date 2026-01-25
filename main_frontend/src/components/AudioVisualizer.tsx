@@ -10,6 +10,7 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
   const animationRef = useRef<number>();
   const analyzerRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,10 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
       
       try {
         const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        audioContextRef.current = audioContext;
+        if (audioContext.state === 'suspended') {
+          audioContext.resume().catch(() => {});
+        }
         const analyzer = audioContext.createAnalyser();
         analyzer.fftSize = 64;
         
@@ -41,6 +46,18 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
     audio.addEventListener('play', initAudio);
     return () => audio.removeEventListener('play', initAudio);
   }, [audioRef, isInitialized]);
+
+  useEffect(() => {
+    return () => {
+      try {
+        audioContextRef.current?.close();
+      } catch {
+      }
+      audioContextRef.current = null;
+      analyzerRef.current = null;
+      sourceRef.current = null;
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
