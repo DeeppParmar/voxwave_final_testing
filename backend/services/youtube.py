@@ -21,19 +21,8 @@ else:
 
 
 def _search_videos_sync(q: str):
-    # Skip OAuth in production to avoid authentication issues
-    # OAuth requires manual completion which isn't possible on headless servers
-    try:
-        logger.info(f"Starting search for: {q}")
-        s = Search(q)
-        logger.info(f"Search object created, getting videos...")
-        videos = s.videos
-        logger.info(f"Found {len(videos)} videos")
-        return videos
-    except Exception as e:
-        logger.error(f"Search failed: {e}")
-        logger.error(f"Error type: {type(e)}")
-        return []
+    s = Search(q)
+    return s.videos
 
 
 def _extract_audio_sync(video_id: str):
@@ -88,29 +77,23 @@ async def search_youtube_service(q: str):
             return cached['data']
 
         results = await asyncio.to_thread(_search_videos_sync, q)
-        logger.info(f"Search returned {len(results) if results else 0} raw results")
             
         if not results:
-            logger.warning("No results found from YouTube search")
             return []
             
         search_results = []
         
-        for i, video in enumerate(results):
+        for video in results:
             if len(search_results) >= 20:
                 break
                 
             try:
-                logger.info(f"Processing video {i+1}: {getattr(video, 'title', 'No title')}")
-                
                 # Basic validation
                 if not video.video_id:
-                    logger.warning(f"Skipping video {i+1}: no video_id")
                     continue
                 
                 duration = video.length
                 if duration < 60: # Skip shorts
-                    logger.warning(f"Skipping video {i+1}: too short ({duration}s)")
                     continue
 
                 minutes = duration // 60
@@ -126,13 +109,10 @@ async def search_youtube_service(q: str):
                     url=f"https://www.youtube.com/watch?v={video.video_id}"
                 )
                 search_results.append(search_result)
-                logger.info(f"Added video {i+1} to results")
                 
-            except Exception as e:
-                logger.error(f"Error processing video {i+1}: {e}")
+            except Exception:
                 continue
 
-        logger.info(f"Final search results: {len(search_results)} videos")
         search_cache[cache_key] = {
             'data': search_results,
             'timestamp': datetime.now()

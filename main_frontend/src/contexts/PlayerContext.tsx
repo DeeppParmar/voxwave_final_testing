@@ -39,7 +39,7 @@ interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
 
-import { baseURL as API_BASE } from '@/lib/axios';
+const API_BASE = '';
 const QUEUE_STORAGE_KEY = 'voxwave_queue';
 
 function safeParseQueue(value: string | null): Track[] {
@@ -112,9 +112,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const audio = audioRef.current;
       if (!audio) return;
 
-      audio.muted = false;
-      audio.volume = volume;
-
       const isYoutube = track.source === 'youtube' && track.id.startsWith('yt-');
       const videoId = isYoutube ? track.id.slice(3) : null;
       let retries = 0;
@@ -139,8 +136,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       };
 
       audio.oncanplay = () => {
-        audio.muted = false;
-        audio.volume = volume;
         audio.play().catch(() => {
           toast.error('Failed to play audio. Please try again.');
         });
@@ -150,7 +145,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    audioRef.current?.play().catch(() => { });
+    audioRef.current?.play().catch(() => {});
   }, []);
 
   const pause = useCallback(() => {
@@ -275,7 +270,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         playLocal,
       }}
     >
-      <audio ref={audioRef} crossOrigin="anonymous" />
+      <audio ref={audioRef} />
       {children}
     </PlayerContext.Provider>
   );

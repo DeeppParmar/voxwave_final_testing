@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { api } from '@/lib/axios';
+import axios from 'axios';
+
+// Configure axios to use ngrok backend
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+axios.defaults.baseURL = API_BASE_URL;
 
 type AuthUser = {
   id: number;
@@ -24,9 +28,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // axios interceptor handles token now
   useEffect(() => {
-    // We can still trigger re-renders or other logic if token changes
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
   }, [token]);
 
   useEffect(() => {
@@ -38,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (!cancelled) setUser(null);
           return;
         }
-        const resp = await api.get('/me');
+        const resp = await axios.get('/me');
         if (!cancelled) setUser(resp.data);
       } catch {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
@@ -58,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [token]);
 
   const login = async (username: string, password: string) => {
-    const resp = await api.post('/auth/login', { username, password });
+    const resp = await axios.post('/auth/login', { username, password });
     const newToken = resp.data?.token;
     const newUsername = resp.data?.username;
     if (!newToken || !newUsername) throw new Error('Invalid login response');
@@ -66,12 +73,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(TOKEN_STORAGE_KEY, newToken);
     setToken(newToken);
 
-    const me = await api.get('/me');
+    const me = await axios.get('/me', {
+      headers: { Authorization: `Bearer ${newToken}` },
+    });
     setUser(me.data);
   };
 
   const register = async (username: string, password: string) => {
-    const resp = await api.post('/auth/register', { username, password });
+    const resp = await axios.post('/auth/register', { username, password });
     const newToken = resp.data?.token;
     const newUsername = resp.data?.username;
     if (!newToken || !newUsername) throw new Error('Invalid register response');
@@ -79,13 +88,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(TOKEN_STORAGE_KEY, newToken);
     setToken(newToken);
 
-    const me = await api.get('/me');
+    const me = await axios.get('/me', {
+      headers: { Authorization: `Bearer ${newToken}` },
+    });
     setUser(me.data);
   };
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await axios.post('/auth/logout');
     } catch {
     } finally {
       localStorage.removeItem(TOKEN_STORAGE_KEY);

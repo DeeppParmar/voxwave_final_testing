@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search as SearchIcon, Play, Loader2, Youtube, Clock, User, Heart, Plus } from 'lucide-react';
-import { api, baseURL as API_BASE } from '@/lib/axios';
+import axios from 'axios';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,7 @@ interface SearchResult {
   duration: string;
 }
 
-// API_BASE is imported from lib/axios
+const API_BASE = '';
 
 const container = {
   hidden: { opacity: 0 },
@@ -43,7 +43,7 @@ export default function Search() {
     setHasSearched(true);
 
     try {
-      const response = await api.get(`/search`, {
+      const response = await axios.get(`${API_BASE}/search`, {
         params: { q: query },
       });
       const data = response.data;
@@ -56,10 +56,10 @@ export default function Search() {
 
       const rawResults =
         Array.isArray(data) ? data :
-          Array.isArray(data?.results) ? data.results :
-            Array.isArray(data?.result) ? data.result :
-              Array.isArray(data?.data?.results) ? data.data.results :
-                [];
+        Array.isArray(data?.results) ? data.results :
+        Array.isArray(data?.result) ? data.result :
+        Array.isArray(data?.data?.results) ? data.data.results :
+        [];
 
       const normalizedResults = (rawResults as any[])
         .filter(Boolean)
@@ -105,7 +105,7 @@ export default function Search() {
 
   const handleSave = async (result: SearchResult) => {
     try {
-      await api.post(`/me/library`, {
+      await axios.post(`${API_BASE}/me/library`, {
         track_id: result.id,
         source: 'youtube',
         title: result.title,
@@ -205,8 +205,9 @@ export default function Search() {
                 variants={item}
                 layout
                 whileHover={{ scale: 1.02 }}
-                className={`glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all ${isCurrentTrack(result.id) ? 'ring-1 ring-primary/50' : ''
-                  }`}
+                className={`glass-card rounded-2xl overflow-hidden flex group cursor-pointer transition-all ${
+                  isCurrentTrack(result.id) ? 'ring-1 ring-primary/50' : ''
+                }`}
                 onClick={() => handlePlay(result)}
               >
                 {/* Thumbnail */}

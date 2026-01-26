@@ -21,20 +21,9 @@ app = FastAPI(
 )
 
 # CORS Config
-origins = [
-    "http://localhost:5173",  # Local development
-    "http://localhost:3000",  # Local development alternative
-]
-
-# Add production frontend URL if set
-frontend_url = os.environ.get("FRONTEND_URL")
-if frontend_url:
-    origins.append(frontend_url)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_origin_regex="https://.*\.vercel\.app",  # Allow all Vercel deployments (preview & production)
+    allow_origins=["*"],  # Simplified for dev, should be specific in prod
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,16 +41,12 @@ if (DIST_DIR / "index.html").exists():
     app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
 
 # Include API Router
-app.include_router(api_router, prefix="/api")
+app.include_router(api_router)
 
 
 @app.on_event("startup")
 async def startup_event():
-    init_auth_db()
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "service": "voxwave-backend"}
+    init_auth_db(DB_PATH)
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():

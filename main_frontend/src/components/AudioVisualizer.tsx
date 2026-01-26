@@ -10,33 +10,7 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
   const animationRef = useRef<number>();
   const analyzerRef = useRef<AnalyserNode | null>(null);
   const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-
-  const ensureAudioContextRunning = () => {
-    try {
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      }
-      if (audioContextRef.current.state === 'suspended') {
-        audioContextRef.current.resume().catch(() => {});
-      }
-    } catch {
-    }
-  };
-
-  useEffect(() => {
-    const handleUserGesture = () => {
-      ensureAudioContextRunning();
-    };
-
-    window.addEventListener('pointerdown', handleUserGesture);
-    window.addEventListener('keydown', handleUserGesture);
-    return () => {
-      window.removeEventListener('pointerdown', handleUserGesture);
-      window.removeEventListener('keydown', handleUserGesture);
-    };
-  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -47,9 +21,7 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
       if (isInitialized) return;
       
       try {
-        ensureAudioContextRunning();
-        const audioContext = audioContextRef.current;
-        if (!audioContext) return;
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
         const analyzer = audioContext.createAnalyser();
         analyzer.fftSize = 64;
         
@@ -69,18 +41,6 @@ export function AudioVisualizer({ audioRef, isPlaying }: AudioVisualizerProps) {
     audio.addEventListener('play', initAudio);
     return () => audio.removeEventListener('play', initAudio);
   }, [audioRef, isInitialized]);
-
-  useEffect(() => {
-    return () => {
-      try {
-        audioContextRef.current?.close();
-      } catch {
-      }
-      audioContextRef.current = null;
-      analyzerRef.current = null;
-      sourceRef.current = null;
-    };
-  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;

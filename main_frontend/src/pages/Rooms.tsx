@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Radio, Users, Plus, Copy, LogIn, Music2, Crown, Loader2 } from 'lucide-react';
-import { api, baseURL as API_BASE } from '@/lib/axios';
+import axios from 'axios';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ interface Room {
   currentTrack?: string;
 }
 
-// API_BASE imported from lib/axios
+const API_BASE = '';
 
 export default function Rooms() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -44,7 +44,7 @@ export default function Rooms() {
 
     setLoading(true);
     try {
-      const response = await api.post(`/create-room`);
+      const response = await axios.post(`${API_BASE}/create-room`);
       const room = response.data;
       setInviteLink(room.join_url || '');
       toast.success('Room created!');

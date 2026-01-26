@@ -19,16 +19,6 @@ CACHE_DIR = ROOT_DIR / "cache"
 DATA_DIR = ROOT_DIR / "data"
 DB_PATH = DATA_DIR / "voxwave.db"
 
-# Database Config
-# If DATABASE_URL is not set, fallback to local SQLite.
-DATABASE_URL = os.environ.get("DATABASE_URL")
-if not DATABASE_URL:
-    # SQLALCHEMY requires 'sqlite:///' prefix
-    DATABASE_URL = f"sqlite:///{DB_PATH}" 
-elif DATABASE_URL.startswith("postgres://"):
-    # SQLAlchemy 1.4+ requires postgresql://
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
 # Ensure directories exist
 UPLOAD_DIR.mkdir(exist_ok=True)
 CACHE_DIR.mkdir(exist_ok=True)
