@@ -10,6 +10,7 @@ import logging
 from datetime import datetime
 import httpx
 import asyncio
+import os
 
 from ..core.config import UPLOAD_DIR, ALLOWED_EXTENSIONS, MAX_FILE_SIZE, YOUTUBE_USER_AGENT, DB_PATH
 from ..models.schemas import UploadResponse, SearchResponse, HealthResponse, ErrorResponse, AuthRequest, AuthResponse, MeResponse, SavedTracksResponse, SaveTrackRequest
@@ -401,7 +402,12 @@ async def create_room(request: Request):
     }
     room_connections[room_id] = []
 
-    join_url = f"{str(request.base_url).rstrip('/')}/rooms?room={room_id}"
+    frontend_base = (
+        os.environ.get("FRONTEND_BASE_URL")
+        or request.headers.get("origin")
+        or str(request.base_url).rstrip("/")
+    ).rstrip("/")
+    join_url = f"{frontend_base}/rooms?room={room_id}"
     return {
         'room_id': room_id,
         'host_id': active_rooms[room_id]['host_id'],

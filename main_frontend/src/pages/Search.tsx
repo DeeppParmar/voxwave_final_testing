@@ -5,6 +5,7 @@ import axios from 'axios';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { API_BASE_URL } from '@/config/runtime';
 
 interface SearchResult {
   id: string;
@@ -14,7 +15,7 @@ interface SearchResult {
   duration: string;
 }
 
-const API_BASE = '';
+const API_BASE = API_BASE_URL;
 
 const container = {
   hidden: { opacity: 0 },

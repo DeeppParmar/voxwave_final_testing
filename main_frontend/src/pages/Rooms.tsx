@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearchParams } from 'react-router-dom';
+import { API_BASE_URL, WS_BASE_URL } from '@/config/runtime';
 
 interface Room {
   id: string;
@@ -17,7 +18,7 @@ interface Room {
   currentTrack?: string;
 }
 
-const API_BASE = '';
+const API_BASE = API_BASE_URL;
 
 export default function Rooms() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -64,7 +65,8 @@ export default function Rooms() {
 
     const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const wsHost = window.location.host;
-    const ws = new WebSocket(`${wsProtocol}://${wsHost}/ws/${roomId}/${userId}`);
+    const wsBase = WS_BASE_URL || `${wsProtocol}://${wsHost}`;
+    const ws = new WebSocket(`${wsBase}/ws/${roomId}/${userId}`);
 
     ws.onopen = () => {
       setActiveRoom({

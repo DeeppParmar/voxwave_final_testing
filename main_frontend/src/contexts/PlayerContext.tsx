@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/config/runtime';
 
 export interface Track {
   id: string;
@@ -39,7 +40,7 @@ interface PlayerContextType {
 
 const PlayerContext = createContext<PlayerContextType | null>(null);
 
-const API_BASE = '';
+const API_BASE = API_BASE_URL;
 const QUEUE_STORAGE_KEY = 'voxwave_queue';
 
 function safeParseQueue(value: string | null): Track[] {

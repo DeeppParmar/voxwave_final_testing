@@ -4,6 +4,7 @@ import { Upload, Music2, File, Trash2, Play, Loader2, FolderOpen, CloudUpload, Y
 import axios from 'axios';
 import { usePlayer } from '@/contexts/PlayerContext';
 import { toast } from 'sonner';
+import { API_BASE_URL } from '@/config/runtime';
 
 interface LibraryFile {
   filename: string;
@@ -20,7 +21,7 @@ interface SavedTrack {
   created_at: number;
 }
 
-const API_BASE = '';
+const API_BASE = API_BASE_URL;
 
 const container = {
   hidden: { opacity: 0 },
